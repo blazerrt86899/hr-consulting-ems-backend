@@ -36,10 +36,7 @@ spec:
             - containerPort: 8080                
           env:   
           - name: DB_HOST   
-            valueFrom: 
-              configMapKeyRef:
-                name: db-conf  
-                key: host
+            value: 192.168.145.195
           - name: DB_NAME  
             valueFrom:
               configMapKeyRef:
