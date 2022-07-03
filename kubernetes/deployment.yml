@@ -23,7 +23,7 @@ spec:
   selector:         
     matchLabels:
       app: springboot-k8s-mysql
-  replicas: 3        
+  replicas: 1        
   template:
     metadata:
       labels:        
@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: springboot-k8s-mysql
-          image: springboot-k8s-deployment:1.0
+          image: blazerrt86899/springbootkube-app:latest
           ports:
             - containerPort: 8080                
           env:   
