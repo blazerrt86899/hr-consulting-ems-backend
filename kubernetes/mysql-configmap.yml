@@ -4,4 +4,4 @@ metadata:
   name: db-conf
 data:
  host: mysql
- name: test  
+ name: hrmsdb  
