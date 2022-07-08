@@ -12,7 +12,7 @@ spec:
       protocol: TCP
   selector:           
     app: springboot-k8s-mysql
-  type: NodePort       
+  type: LoadBalancer       
 
 ---
 apiVersion: apps/v1 
