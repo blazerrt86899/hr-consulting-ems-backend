@@ -36,7 +36,7 @@ spec:
             - containerPort: 8080                
           env:   
           - name: DB_HOST   
-            value: 192.168.145.195
+            value: "mysql"
           - name: DB_NAME  
             valueFrom:
               configMapKeyRef:
