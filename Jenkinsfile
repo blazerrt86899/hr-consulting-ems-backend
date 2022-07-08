@@ -6,12 +6,11 @@ pipeline {
     stages {
         stage('pull from scm'){
             steps {
-                git branch: 'main', credentialsId: 'git-lab-token', url: 'https://github.com/blazerrt86899/hr-consulting-ems-backend.git'
+                git branch: 'aksdeploy', credentialsId: 'git-lab-token', url: 'https://github.com/blazerrt86899/hr-consulting-ems-backend.git'
                 sh "mvn -Dmaven.test.failure.ignore=true clean package"
             }
             post {
-                // If Maven was able to run the tests, even if some of the test
-                // failed, record the test results and archive the jar file.
+                
                 success {
                     junit '**/target/surefire-reports/TEST-*.xml'
                     archiveArtifacts 'target/*.jar'
