@@ -1,8 +1,4 @@
 pipeline {
-    environment {
-        registry = "40.121.32.216:8085/hrms"
-        registryCredential = 'nexus-repo'
-    }
     agent any
     tools {
         maven "mvn3"
@@ -11,77 +7,28 @@ pipeline {
         stage('pull from scm'){
             steps {
                 git branch: 'main', credentialsId: 'git-lab-token', url: 'https://github.com/blazerrt86899/hr-consulting-ems-backend.git'
-            }
-        }
-        
-        stage('mvn build') {
-            steps {
-                sh "mvn clean install"
+                sh "mvn -Dmaven.test.failure.ignore=true clean package"
             }
             post {
+                // If Maven was able to run the tests, even if some of the test
+                // failed, record the test results and archive the jar file.
                 success {
-                    junit '**/target/surefire-reports/*.xml'
+                    junit '**/target/surefire-reports/TEST-*.xml'
                     archiveArtifacts 'target/*.jar'
                 }
             }
         }
-        stage('checkstyle') {
-            steps {
-                    sh 'mvn checkstyle:checkstyle'
-            }
-        }
         
-        stage('checkstyle report') {
-            steps {
-                recordIssues(tools: [checkStyle(pattern: 'target/checkstyle-result.xml')])
-            }
-        }
-        
-        stage('code coverage') {
-            steps {
-                jacoco()
-            }
-        }
-        
-        stage('code quality with Sonar') {
-            steps {
-                sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=hrmsspring -Dsonar.host.url=http://20.231.202.95:9000/ -Dsonar.login=sqa_eb0963c26f4515d4860176b58d840a34ba6a3e49'
-            }
-        }
-        
-        stage ('Nexus upload')  {
-          steps {
-          nexusArtifactUploader(
-          nexusVersion: 'nexus3',
-          protocol: 'http',
-          nexusUrl: '40.121.32.216:8081',
-          groupId: 'com.example.angular',
-          version: '0.0.1-SNAPSHOT',
-          repository: 'maven-snapshots',
-          credentialsId: 'nexus-repo',
-          artifacts: [
-            [artifactId: 'springboot-angular-kubernetes',
-             classifier: '',
-             file: 'target/springboot-angular-kubernetes-0.0.1-SNAPSHOT.jar',
-             type: 'jar']
-        ]
-        )
-          }
-        }
-        stage('docker image') {
+        stage('Deploy to aks') {
             steps {
                 script {
-                  dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                }
-            }
-        }
-        stage('docker push') {
-            steps {
-                script {
-                  withDockerRegistry(credentialsId: registryCredential, url: 'http://40.121.32.216:8085') {
-                      dockerImage.push()
-                      
-                  }
+                        kubeconfig(credentialsId: 'k8sconfigfile', serverUrl: 'https://springaks-dns-daf3ead2.hcp.eastus.azmk8s.io:443') {
+                        sh 'kubectl apply -f ./kubernetes/mysqldb-root-credentials.yml'
+                        sh 'kubectl apply -f ./kubernetes/mysqldb-credentials.yml'
+                        sh 'kubectl apply -f ./kubernetes/mysql-configmap.yml'
+                        sh 'kubectl apply -f ./kubernetes/mysql-deployment.yml'
+                        sh 'kubectl apply -f ./kubernetes/deployment.yml'
+                    }
                 }
             }
         }
