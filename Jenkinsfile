@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('pull from scm'){
             steps {
-                git branch: 'main', credentialsId: 'git-lab-token', url: 'https://github.com/blazerrt86899/hr-consulting-ems-backend.git'
+                git branch: 'docker', credentialsId: 'git-lab-token', url: 'https://github.com/blazerrt86899/hr-consulting-ems-backend.git'
             }
         }
         
